@@ -1,39 +1,31 @@
 const express = require('express');
 const router = express.Router();
 const Inventory = require("../models/InventorySchema.js");
+const updateInventory = require("../controllers/inventory.update.js")
 
 // Middleware to parse JSON
 router.use(express.json());
 
 router.get('/', (req, res) => {
-    res.send('This is the inventory router');
+    res.send('This is the inventory route');
 });
 
-router.post('/update', async (req, res) => {
-    try {
-        const { MedicineName, Quantity } = req.body;
+router.post('/update', updateInventory);
 
-        // Validate input
-        if (!MedicineName || Quantity == null) {
-            return res.status(400).json({ error: "MedicineName and Quantity are required" });
-        }
+router.get('/view', async (req, res) => {
+    try{
 
-        // Create new inventory item
-        const newInventoryItem = new Inventory({
-            MedicineName,
-            Quantity
-        });
+    const medDetails = await Inventory.find();
+    res.send(medDetails);
+    res.status(200).json(inventoryItems);
 
-        // Save to database
-        await newInventoryItem.save();
+    } catch(error) {
 
-        // Send success response
-        res.status(201).json({ message: "Medicine details added successfully", newInventoryItem });
-        console.log("Meds updated successfully!")
-    } catch (error) {
-        console.error("Error adding medicine details:", error);
-        res.status(500).json({ error: "Server error" });
+    console.error("Error fetching inventory items:", error);
+    res.status(500).json({ error: "Server error" });
+
     }
 });
+
 
 module.exports = router;
